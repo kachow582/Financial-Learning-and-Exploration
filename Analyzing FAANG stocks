@@ -1,0 +1,101 @@
+#Analyzing and visualizing the FAANG stocks
+#Facebook(Meta), Amazon, Apple, Netflix, and Google
+
+import pandas as pd
+import numpy as np
+import yfinance as yf
+from matplotlib import pyplot as plt
+from datetime import datetime
+
+
+#Initializing list of symbols to download stock data
+symbols = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOG']
+
+#Setting parameters and downloading stock data
+start_date = datetime(2023,1,1)
+end_date = datetime(2023,7,1)
+stock_data = yf.download(symbols,start_date,end_date)
+
+#Setting up subplots
+aapl_sub = stock_data.columns[0]
+aapl_ror = stock_data[aapl_sub].pct_change()
+amzn_sub = stock_data.columns[1]
+amzn_ror = stock_data[amzn_sub].pct_change()
+meta_sub = stock_data.columns[0]
+meta_ror = stock_data[meta_sub].pct_change()
+goog_sub = stock_data.columns[0]
+goog_ror = stock_data[goog_sub].pct_change()
+msft_sub = stock_data.columns[0]
+msft_ror = stock_data[msft_sub].pct_change()
+
+
+#Plotting all figures
+plt.plot(stock_data['Adj Close'])
+plt.xlabel('Date')
+plt.ylabel('Adjusted Closing Price Over Time')
+plt.title('Tech Stocks Adjusted Price')
+plt.legend(symbols)
+plt.show()
+
+simple_ror = stock_data['Adj Close'].pct_change()
+simple_ror.plot()
+plt.xlabel('Date')
+plt.ylabel('Simple ROR')
+plt.legend(symbols)
+plt.figure(figsize=(16,9))
+plt.show()
+
+fig = plt.figure(figsize=(15,15))
+ax1 = fig.add_subplot(321)
+ax2 = fig.add_subplot(322)
+ax3 = fig.add_subplot(323)
+ax4 = fig.add_subplot(324)
+ax5 = fig.add_subplot(325)
+ax1.plot(stock_data['Adj Close']['META'].pct_change())
+ax1.set_title("Meta")
+ax2.plot(stock_data['Adj Close']['AMZN'].pct_change())
+ax2.set_title("Amazon")
+ax3.plot(stock_data['Adj Close']['AAPL'].pct_change())
+ax3.set_title("Apple")
+ax4.plot(stock_data['Adj Close']['NFLX'].pct_change())
+ax4.set_title("Netflix")
+ax5.plot(stock_data['Adj Close']['GOOG'].pct_change())
+ax5.set_title("Google")
+plt.show()
+
+daily_mean = simple_ror.mean()
+height = []
+for key in daily_mean.keys():
+  height.append(daily_mean[key])
+barx = np.arange(len(daily_mean.keys()))
+
+plt.bar(range(len(height)),height)
+plt.xlabel('Tech Stocks')
+plt.ylabel('Daily Mean')
+plt.xticks(barx, daily_mean.keys())
+plt.show()
+
+var_daily = simple_ror.var()
+varheight = []
+barx = np.arange(len(var_daily.keys()))
+
+for key in var_daily.keys():
+  varheight.append(var_daily[key])
+plt.bar(barx,varheight)
+plt.title('Daily Variance')
+plt.xlabel('Tech Stocks')
+plt.ylabel('Variance')
+plt.xticks(barx,var_daily.keys())
+plt.show()
+
+stddev_ror = simple_ror.std()
+stddev_ror
+plt.bar(np.arange(len(stddev_ror.keys())),stddev_ror)
+plt.title('Standard Deviation of Tech Stocks')
+plt.xlabel('Tech Stocks')
+plt.ylabel('Standard Deviation')
+plt.xticks(np.arange(len(stddev_ror.keys())),stddev_ror.keys())
+plt.show()
+
+print('The stock with the greatest daily returns on average was META. However, with the highest variance and standard deviation, that also makes it the riskiest.')
+print('AAPL was the least risky stock, but also had the second highest average daily returns.')
