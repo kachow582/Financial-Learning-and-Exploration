@@ -1,0 +1,84 @@
+#Calculating financial statistics of the stocks I currently hold and creating a linear regression to observe how they'll move in the future
+
+#Imports
+import pandas as pd
+import numpy as np
+import yfinance as yf
+from matplotlib import pyplot as plt
+from datetime import datetime as dt
+from sklearn.linear_model import LinearRegression
+
+
+#Downloading stock data from yahoo finance
+symbols = ['ERX','JNJ','MSFT','RIVN','VFC','WBA']
+start = dt(2022,8,15)
+end = dt(2023,8,14)
+stockdata = yf.download(symbols,start,end)
+
+
+adjclose = stockdata['Adj Close']
+daily_simp_ror = adjclose.pct_change()
+daily_mean = daily_simp_ror.mean()
+daily_var = daily_simp_ror.var()
+daily_std = daily_simp_ror.std()
+
+#This is currently just for referece, the investment viability isnt greatly influenced by closing price over a year
+plt.figure(figsize=(21,10))
+plt.plot(adjclose)
+plt.legend(symbols)
+plt.xlabel('Date')
+plt.ylabel('Stock Price')
+plt.title('52 Week History Closing Price of Selected Stocks')
+plt.show()
+
+#Plotting simple daily returns
+plt.figure(figsize=(21,10))
+plt.plot(daily_simp_ror)
+plt.xlabel('Date')
+plt.ylabel('% Change in Price')
+plt.title('Simple Daily Returns of Selected Stocks')
+plt.legend(symbols)
+plt.show()
+
+#Plotting daily mean returns
+plt.figure(figsize=(21,10))
+plt.bar(range(len(daily_mean)),daily_mean)
+plt.xticks(range(len(daily_mean)),daily_mean.keys())
+plt.xlabel('Stocks')
+plt.ylabel('% Change in Price')
+plt.title('Average Daily Returns of Selected Stocks')
+plt.show()
+
+#Plotting variance
+plt.figure(figsize=(21,10))
+plt.bar(range(len(daily_var)),daily_var)
+plt.xticks(range(len(daily_var)),daily_var.keys())
+plt.title('Variance of Selected Stocks')
+plt.xlabel('Stocks')
+plt.ylabel('Variance')
+plt.show()
+
+#Plotting standard deviation
+plt.figure(figsize=(21,10))
+plt.bar(range(len(daily_std)),daily_std)
+plt.xticks(range(len(daily_std)),daily_std.keys())
+plt.xlabel('Stocks')
+plt.ylabel('Standard Deviation')
+plt.show()
+
+
+#Linear Regression model
+# X = np.arange(start.astype(datetime),end.astype(datetime))
+X = np.arange(len(adjclose))
+X = X.reshape(-1, 1)
+linreg = LinearRegression()
+linreg.fit(X,adjclose)
+predict = linreg.predict(X)
+plt.xticks()
+plt.plot(X,predict)
+plt.legend(symbols)
+plt.title('Linear Regression Prediction Model of Stock Growth')
+plt.xlabel('Days')
+plt.ylabel('Stock Price')
+plt.show()
+
