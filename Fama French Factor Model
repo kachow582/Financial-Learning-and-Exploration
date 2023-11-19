@@ -1,0 +1,43 @@
+import pandas as pd
+import numpy as np
+from scipy.stats.mstats import winsorize
+from statsmodels.regression.linear_model import WLS
+import statsmodels.api as sm
+
+#read data from csv
+df = pd.read_csv("cleaned_factset_data.csv")
+
+#drop rows with Nan
+df.dropna(inplace=True)
+
+#convert from string to float
+df['CAP'] = df['CAP'].astype(float)
+
+
+import scipy
+#new column for log market cap
+df['log_mktcap'] = np.log(df.CAP)
+
+
+for columns in df:
+  if type(df.columns) == 'float64' or type(df.columns) == 'int64':
+     df['zscore_{}'.format(columns)] = scipy.stats.zscore(df.columns)
+
+for columns in df:
+  if type(df.columns) == 'float64' or type(df.columns) == 'int64':
+    scipy.stats.mstats.winsorize(columns, limits=[.01,.99])
+
+
+#define monthly return as dependent variable
+dependent = df['monthly_return']
+
+#define winsorized data as explanatory variables
+explanatory = df.select_dtypes(include=['float64', 'int64'])
+explanatory = sm.add_constant(explanatory)
+
+#create model
+model = WLS(dependent, explanatory, weight=None)
+
+#fit the model and print results
+results = model.fit()
+print(results.summary())
